@@ -1,10 +1,12 @@
-from flask import Flask, request
+from flask import Flask, request, flash, redirect, url_for, send_from_directory
 from flask_mysqldb import MySQL
+from werkzeug.utils import secure_filename
 import json
 import os
 import base64
 import hashlib
 import jwt
+
 
 app = Flask(__name__)
 app.config['MYSQL_USER'] = 'root'
@@ -13,16 +15,37 @@ app.config['MYSQL_DB'] = 'financepeer_task'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 mysql = MySQL(app)
 
-# Import json data to MySQL
+UPLOAD_FOLDER = './data'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+ALLOWED_EXTENSIONS = {'json'}
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# Upload a file and save its content to the database
 
 @app.route('/upload/file', methods = ["POST"])
 def fileUpload():
 
-    # read json file
-    file = os.path.abspath("./data/userdata.json")
+    if 'file' not in request.files:
+        flash('No file part')
+        return redirect(request.url)
+    
+    file = request.files['file']
+    
+    if file.filename == '':
+        flash('No selected file')
+        return redirect(request.url)
 
-    # print(file)
-    json_data = open(file).read()
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+    # retrieving the saved file
+    retrieve_file = os.path.abspath(UPLOAD_FOLDER + "/" + filename)
+    json_data = open(retrieve_file).read()
     json_obj = json.loads(json_data)
 
     # validation before insertion
@@ -39,8 +62,6 @@ def fileUpload():
         title = validate(item[1]["title"])
         body = validate(item[1]["body"])
 
-
-    
         cursor = mysql.connection.cursor()
         cursor.execute (
             """INSERT INTO json_data (id, user_id, title, body)
