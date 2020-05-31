@@ -1,12 +1,14 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
-import FileUpload from './Components/Common/FileUpload';
+import Routes from './Routes/Routes';
+import {BrowserRouter} from 'react-router-dom';
 
-function App() {
+function App(props) {
   return (
     <div className="App">
-      <FileUpload />
+      <BrowserRouter>
+        <Routes />
+      </BrowserRouter>
     </div>
   );
 }

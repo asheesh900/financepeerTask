@@ -75,7 +75,6 @@ def fileUpload():
 
 @app.route('/records', methods = ["GET"])
 def getAllRecords():
-    # user_id = token_decoder()
     
     cursor = mysql.connection.cursor()
     cursor.execute(

@@ -1,77 +1,72 @@
-import React, { Component } from 'react'
-import axios from 'axios';
+import React, { Component } from "react";
+import { connect } from "react-redux";
+import { uploadFile } from "../../Redux/FileUpload/Action";
 
-export default class FileUpload extends Component {
-    constructor(props) {
-        super(props)
-    
-        this.state = {
-            uploadFile: ""
-        }
-    }
-    
-    handleChange = (e) => {
-        e.preventDefault()
-        this.setState({
-            [e.target.name]: e.target.files[0]
-        })
-        // let file =  e.target.uploadFile.files[0]
-        console.log(e.target.files)
-    }
+class FileUpload extends Component {
+  constructor(props) {
+    super(props);
 
-    handleClick = (e) => {
-        const data = new FormData()
-        data.append('file', this.state.uploadFile)
+    this.state = {
+      uploadFile: "",
+    };
+  }
 
-        const url = `http://localhost:5000/upload/file`
-        axios
-            .post(url, data)
-            .then(res => {
-                console.log(res.data)
-            })
-    }
+  handleChange = (e) => {
+    e.preventDefault();
+    this.setState({
+      [e.target.name]: e.target.files[0],
+    });
+    // console.log(e.target.files);
+  };
 
-    componentDidMount = () => {
-        
-    }
+  handleClick = (e) => {
+    const data = new FormData();
+    data.append("file", this.state.uploadFile);
 
+    this.props.uploadFile(data);
+    this.fileInput.value = "";
+  };
 
-    render() {
-        return (
-          <div className="container col-8">
-            <h1>File upload module</h1>
-            <form className="upload">
-              <div className="custom-file mb-3">
-                <input
-                  onChange={this.handleChange}
-                  type="file"
-                  name="uploadFile"
-                  accept=".json"
-                  className="custom-file-input"
-                  id="validatedCustomFile"
-                  required
-                />
-                <label
-                  className="custom-file-label"
-                  htmlFor="validatedCustomFile"
-                >
-                  Choose file...
-                </label>
-                <button
-                  type="button"
-                  class="btn btn-success btn-block mt-4"
-                  onClick={this.handleClick}
-                >
-                  Upload File
-                </button>
-              </div>
-            </form>
-            {/* <form class="upload">
-                        <input type="file" name="uploadFile" accept=".json" required />
-                        <br/><br/>
-                        <input type="submit" />
-                    </form> */}
+  render() {
+    return (
+      <>
+        <h1 className="text-center mt-4">File upload module</h1>
+        <div className="container  file-upload-cont">
+          <div className="row">
+            <div className="col-md-6">
+              <form method="post" action="#" id="#">
+                <div className="form-group files">
+                  <label>Upload Your File </label>
+                  <input
+                    name="uploadFile"
+                    onChange={this.handleChange}
+                    type="file"
+                    className="form-control"
+                    accept=".json"
+                    ref={(ref) => (this.fileInput = ref)}
+                    multiple=""
+                  />
+                </div>
+              </form>
+            </div>
           </div>
-        );
-    }
+          <div className="col-md-6">
+            <button
+              type="button"
+              className="btn btn-success  btn-block mt-4"
+              onClick={this.handleClick}
+            >
+              Upload File
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  }
 }
+
+const mapDispatchToProps = (dispatch) => ({
+  uploadFile: (data) => dispatch(uploadFile(data)),
+});
+
+export default connect(null, mapDispatchToProps)(FileUpload);
